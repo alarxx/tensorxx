@@ -64,8 +64,12 @@ Try to install locally:
 ```sh
 python -m pip install --force-reinstall dist/*.whl
 ```
-- --force-reinstall - if version didn't change
+- `--force-reinstall` - if version didn't change
 
+Uninstall local tensorx-python:
+```sh
+python -m pip uninstall tensorx-python
+```
 
 Inside tensorx/ should be shared libraries (.so)
 ```sh
