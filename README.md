@@ -1,5 +1,7 @@
 # tensorx-python
 
+---
+
 Python bindings for the Tensor-library
 
 - C++20
@@ -10,7 +12,20 @@ Python bindings for the Tensor-library
 
 ---
 
-Example:
+Create virtual environment:
+```sh
+python3 -m venv .venv
+. .venv/bin/activate
+```
+
+Install with pip:
+```sh
+pip install tensorx-python
+```
+
+---
+
+Tensor creation and access example:
 ```python
 import tensorx
 print(tensorx)
@@ -18,41 +33,73 @@ print(tensorx)
 import tensorx._tensorx
 print(tensorx._tensorx)
 
-print("add_ints:", tensorx.add_ints(2, 3))
+if __name__ == "__main__":
+    print("add_ints:", tensorx.add_ints(2, 3))
 
-print("make_tensor:")
-tensorx.make_tensor()
+    print("make_tensor:")
+    tensorx.make_tensor()
 
-t0 = tensorx.Tensor()
-print("t0.rank:", t0.rank, "t0.dims:", t0.dims, "t0.length:", t0.length)
-print("t0:", t0)
+    t0 = tensorx.Tensor()
+    print("t0.rank:", t0.rank, "t0.dims:", t0.dims, "t0.length:", t0.length)
+    print("t0:", t0)
 
-s = tensorx.scalar(3.14)
-print("s:", s)
-print("s.rank:", s.rank, "s.dims:", s.dims, "s.length:", s.length)
-print("s.get:", s.get())     # 3.14
-s.set(2.71)
-print("s.set(2.71)->s.get:", s.get())     # 2.71
+    s = tensorx.scalar(3.14)
+    print("s:", s)
+    print("s.rank:", s.rank, "s.dims:", s.dims, "s.length:", s.length)
+    print("s.get:", s.get())     # 3.14
+    s.set(2.71)
+    print("s.set(2.71)->s.get:", s.get())     # 2.71
 
-t1 = tensorx.Tensor(2, (2, 3))
-print("t1.rank:", t1.rank, "t1.dims:", t1.dims, "t1.length:", t1.length)
-print("t1:", t1)
+    t1 = tensorx.Tensor(2, (2, 3))
+    print("t1.rank:", t1.rank, "t1.dims:", t1.dims, "t1.length:", t1.length)
+    print("t1:", t1)
 
-t2 = tensorx.Tensor(2, 3, 4)
-print("t2.rank:", t2.rank, "t2.dims:", t2.dims, "t2.length:", t2.length)
-print("t2:", t2)
+    t2 = tensorx.Tensor(2, 3, 4)
+    print("t2.rank:", t2.rank, "t2.dims:", t2.dims, "t2.length:", t2.length)
+    print("t2:", t2)
 
-v = tensorx.from_list([1, 2, 3])
-print("v:", v)
+    v = tensorx.from_list([1, 2, 3])
+    print("v:", v)
 
-m = tensorx.from_list([
-    [1,2,3],
-    [4,5,6],
-    [7,8,9]
-])
-print("m:", m)
-print("m.rank:", m.rank, "m.dims:", m.dims, "m.length:", m.length)
-print("m.get(1, 1):", m.get(1, 1))
+    m = tensorx.from_list([
+        [1,2,3],
+        [4,5,6],
+        [7,8,9]
+    ])
+    print("m:", m)
+    print("m.rank:", m.rank, "m.dims:", m.dims, "m.length:", m.length)
+    print("m.get(1, 1):", m.get(1, 1))
+```
+
+Image processing example:
+```sh
+import tensorx
+from tensorx.opencv_utils import imshow
+import numpy as np
+import cv2
+
+if __name__ == "__main__":
+    print("Hello, TensorX!")
+
+    path = "./lenna.png"
+    t = tensorx.imread(path)
+
+    print(f"t: rank({t.rank}), size({t.length})")
+    print(f"t: dims({t.dims})")
+
+    blurred = tensorx.gaussian_blur(t, 1)
+    sobel = tensorx.sobel_operator(blurred)
+    nms = tensorx.non_max_suppression(sobel)
+    strongweak = tensorx.double_threshold(nms, 20.0, 80.0)
+    chained = tensorx.hysterisis(nms, 20.0, 80.0)
+
+    imshow("Original", t)
+    imshow("Gaussian Blur", blurred)
+    imshow("Sobel (norm)", sobel)
+    imshow("NMS (norm)", nms)
+    imshow("Double Threshold", strongweak)
+    imshow("Hysteresis", chained)
+
 ```
 
 ---
@@ -133,4 +180,15 @@ cibuildwheel --output-dir dist
 Upload to PyPI:
 ```sh
 python -m twine upload dist/*
+```
+
+
+Разобраться с manylinux:
+```sh
+export CIBW_REPAIR_WHEEL_COMMAND_LINUX='LD_LIBRARY_PATH=/opt/opencv/lib64 auditwheel repair -w {dest_dir} {wheel}'
+
+
+export CIBW_BEFORE_BUILD_LINUX='set -eux; find /opt/opencv -maxdepth 3 -type f -name "libopencv_core.so*" -o -name "libopencv_imgproc.so*" -o -name "libopencv_imgcodecs.so*" -o -name "libopencv_highgui.so*" || true; find /opt/opencv -maxdepth 3 -type d -print;'
+
+export CIBW_SKIP="*-musllinux_*"
 ```

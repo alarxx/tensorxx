@@ -5,8 +5,12 @@ namespace py = pybind11;
 #include <iostream>
 #include <vector>
 #include <stdexcept>
+#include <string>
 
 #include "TensorX/Tensor.hpp"   // путь поправь под свой include
+#include "TensorX/opencv_utils.hpp"      // tensor::imread_gray, tensor::imshow
+#include "TensorX/image_processing.hpp"  // gaussian_blur/sobel_operator/non_max_suppression/hysterisis templates
+
 
 int add_ints(int a, int b){
     return a + b;
@@ -240,5 +244,87 @@ PYBIND11_MODULE(_tensorx, m) {
             // use your toString()
             return t.toString();
         });
+
+
+
+    // OpenCV Utils
+
+    m.def(
+        "imread",
+        [](const std::string& path) -> tensor::Tensor<float> {
+            if (path.empty()) throw std::runtime_error("imread: path is empty");
+            return tensor::imread_gray(path);   // from TensorX/opencv_utils.hpp
+        },
+        py::arg("path"),
+        "Read an image as grayscale Tensor<float>."
+    );
+
+    m.def(
+        "imshow",
+        [](const tensor::Tensor<float>& t,
+        const std::string& title,
+        int delay_ms) {
+            // Your tensor::imshow likely shows and may or may not block internally.
+            tensor::imshow(t, title);           // from TensorX/opencv_utils.hpp
+
+            // If tensor::imshow DOES NOT call cv::waitKey, you can do it here:
+            // cv::waitKey(delay_ms);
+
+            (void)delay_ms;
+        },
+        py::arg("tensor"),
+        py::arg("title") = std::string("TensorX"),
+        py::arg("delay_ms") = 0,
+        "Show a tensor in an OpenCV window."
+    );
+
+    // Image Processing
+
+    m.def(
+        "gaussian_blur",
+        [](const tensor::Tensor<float>& image, int times) -> tensor::Tensor<float> {
+            if (times < 1) throw std::runtime_error("gaussian_blur: times must be >= 1");
+            return tensor::gaussian_blur<float>(image, times);
+        },
+        py::arg("image"),
+        py::arg("times") = 1
+    );
+
+    m.def(
+        "sobel_operator",
+        [](const tensor::Tensor<float>& image) -> tensor::Tensor<float> {
+            return tensor::sobel_operator<float>(image);
+        },
+        py::arg("image")
+    );
+
+    m.def(
+        "non_max_suppression",
+        [](const tensor::Tensor<float>& image) -> tensor::Tensor<float> {
+            return tensor::non_max_suppression<float>(image);
+        },
+        py::arg("image")
+    );
+
+    m.def("double_threshold",
+        [](const tensor::Tensor<float>& image, float low, float high) {
+            return tensor::double_threshold<float>(image, low, high);
+        },
+        py::arg("image"),
+        py::arg("low"),
+        py::arg("high")
+    );
+
+    m.def(
+        "hysterisis",
+        [](const tensor::Tensor<float>& image, float low, float high) -> tensor::Tensor<float> {
+            if (low < 0.0f || high < 0.0f) throw std::runtime_error("hysterisis: thresholds must be >= 0");
+            if (low > high) throw std::runtime_error("hysterisis: low must be <= high");
+            return tensor::hysterisis<float>(image, low, high);
+        },
+        py::arg("image"),
+        py::arg("low"),
+        py::arg("high")
+    );
 
 }
