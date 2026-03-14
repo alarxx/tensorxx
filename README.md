@@ -1,6 +1,6 @@
-# tensorx-python
+# Tensor-library (Python)
 
-Python bindings for the Tensor-library
+Python bindings for the [Tensor-library (C++)](https://github.com/alarxx/Tensor-library).
 
 - C++20
 - CMake
