@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(tensorx_python LANGUAGES CXX)
+project(tensorxx LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -16,12 +16,16 @@ find_package(pybind11 CONFIG REQUIRED)
 
 add_subdirectory(Tensor-library)
 
-# _tensorx - binaryь, will be installed to tensorx/
-pybind11_add_module(_tensorx bindings/module.cpp)
-
-target_link_libraries(_tensorx PRIVATE TensorX)
-
-install(TARGETS _tensorx
-    LIBRARY DESTINATION tensorx # --prefix <>
-    RUNTIME DESTINATION tensorx
+# _tensorxx - binary, will be installed to tensorxx/
+pybind11_add_module(_tensorxx bindings/module.cpp)
+target_link_libraries(_tensorxx PRIVATE tensorxx)
+install(TARGETS _tensorxx
+  LIBRARY DESTINATION tensorxx # --prefix <>
+  RUNTIME DESTINATION tensorxx
+  ARCHIVE DESTINATION tensorxx
+)
+install(FILES
+  src/tensorxx/__init__.py
+  # src/tensorxx/opencv_utils.py
+  DESTINATION tensorxx
 )

@@ -1,10 +1,10 @@
 [build-system]
-requires = ["scikit-build-core", "pybind11", "cmake", "ninja"] # isolated environment
+requires = ["scikit-build-core", "pybind11"] # isolated environment
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "tensorx-python" # distributive name for PyPI
-version = "0.0.4"
+name = "tensorxx" # distributive name for PyPI
+version = "0.0.1"
 description = "Python bindings for the Tensor-library"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -13,6 +13,7 @@ license = "MPL-2.0"
 license-files = ["LICEN[CS]E*"]
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: C++",
     "Operating System :: OS Independent",
 ]
 dependencies = [
@@ -21,11 +22,11 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/alarxx/tensorx-python"
-Issues = "https://github.com/alarxx/tensorx-python/issues"
+Homepage = "https://github.com/alarxx/tensorxx"
+Issues = "https://github.com/alarxx/tensorxx/issues"
 
 [tool.scikit-build]
-wheel.packages = ["src/tensorx"]
+wheel.packages = ["src/tensorxx"]
 
 
 # OpenCV
@@ -37,6 +38,8 @@ set -eux
 rm -rf Tensor-library/opencv/build || true
 find . -name "*.so" -delete || true
 """
+repair-wheel-command = "LD_LIBRARY_PATH=/opt/opencv/lib64 auditwheel repair -w {dest_dir} {wheel}"
+skip = "*-musllinux_*"
 
 [tool.cibuildwheel.linux]
 # Собираем OpenCV внутри manylinux контейнера и ставим в /opt/opencv
@@ -69,4 +72,5 @@ find /opt/opencv -name OpenCVConfig.cmake -maxdepth 8
 [tool.cibuildwheel.environment]
 # чтобы find_package(OpenCV CONFIG REQUIRED) нашёл OpenCVConfig.cmake
 CMAKE_PREFIX_PATH = "/opt/opencv"
-SKBUILD_CMAKE_ARGS = "-DCMAKE_PREFIX_PATH=/opt/opencv"
+# SKBUILD_CMAKE_ARGS = "-DCMAKE_PREFIX_PATH=/opt/opencv"
+OpenCV_DIR = "/opt/opencv/lib64/cmake/opencv4"

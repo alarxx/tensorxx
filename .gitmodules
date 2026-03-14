@@ -1,4 +1,4 @@
 [submodule "Tensor-library"]
 	path = Tensor-library
 	url = git@github.com:alarxx/Tensor-library.git
-	branch = c++mappings
+	branch = cxx-mappings

@@ -1,3 +1,4 @@
+/*
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // std::vector <-> Python list
 namespace py = pybind11;
@@ -7,9 +8,30 @@ namespace py = pybind11;
 #include <stdexcept>
 #include <string>
 
-#include "TensorX/Tensor.hpp"   // путь поправь под свой include
-#include "TensorX/opencv_utils.hpp"      // tensor::imread_gray, tensor::imshow
-#include "TensorX/image_processing.hpp"  // gaussian_blur/sobel_operator/non_max_suppression/hysterisis templates
+#include "tensorxx/Tensor.hpp"
+
+int add_ints(int a, int b){
+    return a + b;
+}
+
+PYBIND11_MODULE(_tensorxx, m) {
+    m.doc() = "Tensor-library Python bindings";
+    m.def("add_ints", &add_ints, "A test function");
+}
+*/
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h> // std::vector <-> Python list
+namespace py = pybind11;
+
+#include <iostream>
+#include <vector>
+#include <stdexcept>
+#include <string>
+
+#include "tensorxx/Tensor.hpp"
+#include "tensorxx/opencv_utils.hpp" // tensor::imread_gray, tensor::imshow
+#include "tensorxx/image_processing.hpp" // gaussian_blur/sobel_operator/non_max_suppression/hysterisis templates
 
 
 int add_ints(int a, int b){
@@ -109,8 +131,8 @@ static int linear_index_row_major(const tensor::Tensor<float>& t, const std::vec
     return index;
 }
 
-PYBIND11_MODULE(_tensorx, m) {
-    m.doc() = "TensorX Python bindings";
+PYBIND11_MODULE(_tensorxx, m) {
+    m.doc() = "Tensor-library Python bindings";
     m.def("add_ints", &add_ints, "A test function");
 
     m.def("make_tensor", []() {
@@ -253,7 +275,7 @@ PYBIND11_MODULE(_tensorx, m) {
         "imread",
         [](const std::string& path) -> tensor::Tensor<float> {
             if (path.empty()) throw std::runtime_error("imread: path is empty");
-            return tensor::imread_gray(path);   // from TensorX/opencv_utils.hpp
+            return tensor::imread_gray(path);   // from tensorxx/opencv_utils.hpp
         },
         py::arg("path"),
         "Read an image as grayscale Tensor<float>."
@@ -265,7 +287,7 @@ PYBIND11_MODULE(_tensorx, m) {
         const std::string& title,
         int delay_ms) {
             // Your tensor::imshow likely shows and may or may not block internally.
-            tensor::imshow(t, title);           // from TensorX/opencv_utils.hpp
+            tensor::imshow(t, title);           // from tensorxx/opencv_utils.hpp
 
             // If tensor::imshow DOES NOT call cv::waitKey, you can do it here:
             // cv::waitKey(delay_ms);
@@ -273,7 +295,7 @@ PYBIND11_MODULE(_tensorx, m) {
             (void)delay_ms;
         },
         py::arg("tensor"),
-        py::arg("title") = std::string("TensorX"),
+        py::arg("title") = std::string("Tensor-library"),
         py::arg("delay_ms") = 0,
         "Show a tensor in an OpenCV window."
     );
